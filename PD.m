@@ -1,0 +1,144 @@
+clear
+clc
+
+% ----- GENERAL DATA -----
+c = astroConstants(5) * 1e3 ; % Speed of light in the vacuum (m/s)
+k = 1.38e-23 ; % Boltzmann constant
+
+% ----- TELECOMMAND ------------------------------------------------------
+
+% Frequency (Hz)
+f_PD = 8040e6 ; 
+
+% Wavelength (m)
+lambda_PD = c / f_PD ;  
+
+% GS ANTENNA DATA (SVALBARD) - RECEIVER
+D_GS_X     = 11.3 ; % Diameter (m) 
+eta_GS_X   = 0.55 ; % Efficiency (-)
+e_GS_X     = 0.01 ; % Pointing accuracy (deg) 
+
+% Beamwidth (deg)
+theta_GS_X = 70 * lambda_PD / D_GS_X ; 
+
+SVALBARD = struct("D", D_GS_X, "eta", eta_GS_X, "e", e_GS_X, "theta", theta_GS_X) ;
+
+% Antenna gain (dB)
+SVALBARD.G_RX = 10 * log10( SVALBARD.eta * pi^2 * SVALBARD.D^2 / (lambda_PD)^2 ) ;  
+
+% SC ANTENNA DATA (X-BAND) - TRANSMITTER
+D_SC_X     = 10e-2 ; % Diameter (m) 
+eta_SC_X   = 0.70 ; % Efficiency (-)
+e_SC_X     = 0.01 ; % Pointing accuracy (deg)  
+
+% Beamwidth (deg)
+theta_SC_X =  70 * lambda_PD / D_SC_X ;
+
+SC_X = struct("D", D_SC_X, "eta", eta_SC_X, "e", e_SC_X, "theta", theta_SC_X) ; 
+
+% Antenna gain (dB)
+SC_X.G_TX = 10 * log10( SC_X.eta * pi^2 * SC_X.D^2 / (lambda_PD)^2 ) ; 
+
+% -----LOSSES-----
+
+% Atmospheric losses (dB)
+L_atm_graph = 5e-2 ;
+
+% Elevation correction
+phi = deg2rad(13) ;
+L_atm = - 10 * log10( 10^(L_atm_graph/10) / sin(phi)) ;
+
+% Cable losses (dB)
+L_cable = -3 ;
+
+% Free space losses
+distance = 320e3 / sin(phi) ; % RX to TX antenna in the worst-case condition (at the moment I put it as the altitude but should be done maybe more precisely)
+L_space_PD = - 20 * log10(4 * pi * distance / lambda_PD) ;  
+
+% Pointing losses
+%L_point = - 12 * (e_SC_S / SC_S.theta)^2 ;
+L_point = -0.2 ;
+
+% ----- LINK BUDGET -----
+% Effective data rate (bps)
+Rnet_PD = 10e6 ;
+
+% Modulation and encoding coefficients (-)
+alphaEnc_PD = 2 ;
+alphaMod_PD = 2 ;
+
+% Gross data rate (bps)
+RGross_PD   = Rnet_PD * alphaEnc_PD / alphaMod_PD ;
+
+% Bit Error Rate (from literature)
+BER_PD = 1e-7 ;  
+
+% Minimum energy bit to noise spectral density ratio (dB) - graph
+Eb2Noise_min_PD = 5; 
+
+% Bandwidth (Hz)
+B_PD = (1 + 0.5) * RGross_PD ;
+
+% Minimum signal to noise ratio (dB)
+SNR_min_PD = Eb2Noise_min_PD + 10*log10(RGross_PD) - 10*log10(B_PD);
+
+% Margins
+Eb2Noise_margin = 3 ;
+SNR_margin      = 3 ;
+
+% Update threshold
+Eb2Noise_min_PD = Eb2Noise_min_PD + Eb2Noise_margin ;
+SNR_min_PD = SNR_min_PD + SNR_margin ;
+
+% ----- LINK BUDGET -----
+
+% Transmitted power (W)
+P_tx = 20 ;
+
+% Conversion to dB
+P_tx_dB = 10 * log10(P_tx) ;
+
+% Noise temperature
+T = 100 ;
+
+% Energy per bit to noise ratio
+Eb2Noise = P_tx_dB + SC_X.G_TX + SVALBARD.G_RX + L_cable + L_space_PD + L_atm + L_point - 10 * log10(k * T * RGross_PD) ; 
+
+% Signal to noise ratio
+SNR = P_tx_dB + SC_X.G_TX + SVALBARD.G_RX + L_cable + L_space_PD + L_atm + L_point - 10 * log10(k * T * B_PD) ;
+
+fprintf("--- TELEMETRY SUMMARY (X-BAND) ---\n")
+fprintf(" - Frequency : %d [MHz] \n", f_PD*1e-6);
+fprintf(" - Bandwidth : %d [KHz] \n\n", B_PD*1e-3);
+
+fprintf("---------- RX : SVALBARD ---------- \n");
+fprintf("Type : Parabolic \n")
+fprintf(" - Diameter   : %.2f [m] \n", SVALBARD.D);
+fprintf(" - Efficiency : %.2f  [-] \n", SVALBARD.eta);
+fprintf(" - Pointing   : %.2f  [deg] \n", SVALBARD.e);
+fprintf(" - Gain       : %.2f  [dB] \n", SVALBARD.G_RX) ;
+fprintf(" - Beamwidth  : %.2f  [deg] \n\n", SVALBARD.theta);
+
+fprintf("-------- TX : SPACECRAFT -------- \n");
+fprintf("Type : Quadrifilar helix \n")
+fprintf(" - Diameter   : %.2f   [m] \n", SC_X.D);
+fprintf(" - Efficiency : %.2f   [-] \n", SC_X.eta);
+fprintf(" - Pointing   : %.2f  [deg] \n", SC_X.e);
+fprintf(" - Gain       : %.2f  [dB] \n", SC_X.G_TX) ;
+fprintf(" - Beamwidth  : %.2f [deg] \n\n", SC_X.theta);
+
+fprintf("------------ LOSSES ------------\n")
+fprintf(" - Atmospheric : %.2f   [dB] \n", L_atm) ;
+fprintf(" - Free space  : %.2f [dB] \n", L_space_PD) ;
+fprintf(" - Pointing    : %.2f   [dB] \n", L_point) ;
+fprintf(" - Cable       : %.2f   [dB] \n\n", L_cable) ;
+
+% fprintf("------------ NOISE ------------\n")
+% fprintf(" - Noise temperature : %.2f   [K] \n", T) ;
+% fprintf(" - Noise  : %.2f [dB] \n", L_space_TC) ;
+
+fprintf("------------ RESULTS ------------ \n");
+fprintf(" - EIRP  : %.1f [dB] \n", P_tx_dB + SVALBARD.G_RX + L_cable) ;
+fprintf(" - NOISE : %.1f [dB]\n", 10 * log10(k * T) )
+fprintf(" - Eb_No : %.1f [dB] > %.1f [dB] \n", Eb2Noise, Eb2Noise_min_PD);
+fprintf(" - SNR   : %.1f [dB] > %.1f [dB] \n\n", SNR, SNR_min_PD);
