@@ -16,7 +16,7 @@ lambda_TM = c / f_TM ;
 % GS ANTENNA DATA (KIRUNA) - RECEIVER
 D_GS_S     = 13   ; % Diameter (m) 
 eta_GS_S   = 0.55 ; % Efficiency (-)
-e_GS_S     = 0.03 ; % Pointing accuracy (deg) 
+e_GS_S     = 0.01 ; % Pointing accuracy (deg) 
 
 % Beamwidth (deg)
 theta_GS_S = 70 * lambda_TM / D_GS_S ; % Literature says around 0.76

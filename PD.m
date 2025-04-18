@@ -16,7 +16,7 @@ lambda_PD = c / f_PD ;
 % GS ANTENNA DATA (SVALBARD) - RECEIVER
 D_GS_X     = 11.3 ; % Diameter (m) 
 eta_GS_X   = 0.55 ; % Efficiency (-)
-e_GS_X     = 0.01 ; % Pointing accuracy (deg) 
+e_GS_X     = 0.03 ; % Pointing accuracy (deg) 
 
 % Beamwidth (deg)
 theta_GS_X = 70 * lambda_PD / D_GS_X ; 
@@ -29,7 +29,7 @@ SVALBARD.G_RX = 10 * log10( SVALBARD.eta * pi^2 * SVALBARD.D^2 / (lambda_PD)^2 )
 % SC ANTENNA DATA (X-BAND) - TRANSMITTER
 D_SC_X     = 10e-2 ; % Diameter (m) 
 eta_SC_X   = 0.70 ; % Efficiency (-)
-e_SC_X     = 0.01 ; % Pointing accuracy (deg)  
+e_SC_X     = rad2deg(3500*1e-6) ; % Pointing accuracy (deg)  
 
 % Beamwidth (deg)
 theta_SC_X =  70 * lambda_PD / D_SC_X ;
@@ -45,7 +45,7 @@ SC_X.G_TX = 10 * log10( SC_X.eta * pi^2 * SC_X.D^2 / (lambda_PD)^2 ) ;
 L_atm_graph = 5e-2 ;
 
 % Elevation correction
-phi = deg2rad(13) ;
+phi = deg2rad(5) ;
 L_atm = - 10 * log10( 10^(L_atm_graph/10) / sin(phi)) ;
 
 % Cable losses (dB)
@@ -56,8 +56,7 @@ distance = 320e3 / sin(phi) ; % RX to TX antenna in the worst-case condition (at
 L_space_PD = - 20 * log10(4 * pi * distance / lambda_PD) ;  
 
 % Pointing losses
-%L_point = - 12 * (e_SC_S / SC_S.theta)^2 ;
-L_point = -0.2 ;
+L_point = - 12 * (SVALBARD.e / SVALBARD.theta)^2 ;
 
 % ----- LINK BUDGET -----
 % Effective data rate (bps)
@@ -71,10 +70,10 @@ alphaMod_PD = 2 ;
 RGross_PD   = Rnet_PD * alphaEnc_PD / alphaMod_PD ;
 
 % Bit Error Rate (from literature)
-BER_PD = 1e-7 ;  
+BER_PD = 1e-8 ;  
 
 % Minimum energy bit to noise spectral density ratio (dB) - graph
-Eb2Noise_min_PD = 5; 
+Eb2Noise_min_PD = 5.3; 
 
 % Bandwidth (Hz)
 B_PD = (1 + 0.5) * RGross_PD ;
@@ -93,12 +92,14 @@ SNR_min_PD = SNR_min_PD + SNR_margin ;
 % ----- LINK BUDGET -----
 
 % Transmitted power (W)
-P_tx = 20 ;
+P_tx = 10 ;
 
 % Conversion to dB
 P_tx_dB = 10 * log10(P_tx) ;
 
 % Noise temperature
+%G_T = 36.8 ;
+%T = 10 ^ ((SVALBARD.G_RX - G_T)/10)  ; 
 T = 100 ;
 
 % Energy per bit to noise ratio

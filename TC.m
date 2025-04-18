@@ -29,7 +29,7 @@ KIRUNA.G_TX = 10 * log10( KIRUNA.eta * pi^2 * KIRUNA.D^2 / (lambda_TC)^2 ) ;
 % SC ANTENNA DATA (S-BAND) - RECEIVER
 D_SC_S     = 10e-2 ; % Diameter (m) 
 eta_SC_S   = 0.70  ; % Efficiency (-)
-e_SC_S     = 20    ; % Pointing accuracy (deg) 
+e_SC_S     = rad2deg(3500*1e-6)    ; % Pointing accuracy (deg) 
 
 % Beamwidth (deg)
 theta_SC_S =  70 * lambda_TC / D_SC_S ;
@@ -70,10 +70,10 @@ alphaMod_TC = 2 ;
 RGross_TC   = Rnet_TC * alphaEnc_TC / alphaMod_TC ;
 
 % Bit Error Rate (from literature)
-BER_TC = 1e-7 ;  
+BER_TC = 1e-5 ;  
 
 % Minimum energy bit to noise spectral density ratio (dB) - graph
-Eb2Noise_min_TC = 5; 
+Eb2Noise_min_TC = 4.4; 
 
 % Bandwidth (Hz)
 B_TC = (1 + 0.5) * RGross_TC ;
@@ -117,6 +117,7 @@ fprintf("Type : Parabolic \n")
 fprintf(" - Diameter   : %.2f [m] \n", KIRUNA.D);
 fprintf(" - Efficiency : %.2f  [-] \n", KIRUNA.eta);
 fprintf(" - Pointing   : %.2f  [deg] \n", KIRUNA.e);
+fprintf(" - Gain       : %.2f  [dB] \n", KIRUNA.G_TX) ;
 fprintf(" - Beamwidth  : %.2f  [deg] \n\n", KIRUNA.theta);
 
 fprintf("-------- RX : SPACECRAFT -------- \n");
@@ -124,6 +125,7 @@ fprintf("Type : Quadrifilar helix \n")
 fprintf(" - Diameter   : %.2f   [m] \n", SC_S.D);
 fprintf(" - Efficiency : %.2f   [-] \n", SC_S.eta);
 fprintf(" - Pointing   : %.2f  [deg] \n", SC_S.e);
+fprintf(" - Gain       : %.2f  [dB] \n", SC_S.G_TX) ;
 fprintf(" - Beamwidth  : %.2f [deg] \n\n", SC_S.theta);
 
 fprintf("------------ LOSSES ------------\n")
