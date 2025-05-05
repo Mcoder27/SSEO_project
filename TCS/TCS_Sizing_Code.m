@@ -1,7 +1,8 @@
 %% THERMAL CONTROL SIZING 
 clc
 clear
-
+ 
+% CIAO :)
 %% DATA
 i_orb=96.97;
 ecliptic=23.44; 
