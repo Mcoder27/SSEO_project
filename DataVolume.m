@@ -32,6 +32,7 @@ rho_deg = rad2deg(rho_rad); %[deg]
 
 % Orbit Period
 T_sec = 2*pi*sqrt((R+H)^3/mu_E); %[s]
+
 T_min = T_sec/60;
 
 % Max Nadir angle
