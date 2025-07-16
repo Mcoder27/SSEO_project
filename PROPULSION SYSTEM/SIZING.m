@@ -1,0 +1,6 @@
+clear 
+clc
+
+%% PROPELLANT MASS
+
+%% PROPELLANT VOLUME
