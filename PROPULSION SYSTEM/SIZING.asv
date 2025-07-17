@@ -36,7 +36,4 @@ M_gas_real_He = 1.2*M_gas_He ;
 % Mass Nitrogen
 R_gas_N2      = 296.8 ;
 M_gas_N2      = (p_gas_i*1e5 * V_gas_i*1e-3)/(R_gas_N2 * T_tank); % [kg]
-M_gas_real_He = 1.2*M_gas_N2; 
-
-%% TANKS
-V_tanks = 1.1*(V_gas_i + V_prop); %[dm^3]
+M_gas_real_He = 1.2*M_gas_N2 
