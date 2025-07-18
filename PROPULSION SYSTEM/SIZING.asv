@@ -6,34 +6,57 @@ clc
 M_prop = 259.81 ; %[Kg]
 
 %% PROPELLANT VOLUME
-rho_prop = 1.010 ; % [Kg/dm^3]
+rho_prop = 1010 ; % [Kg/m^3]
 
-V_prop = 1.1 * M_prop / rho_prop ; % [dm^3]
+V_prop = 1.1 * M_prop / rho_prop ; % [m^3]
 
 %% PRESSURANT
-p_inlet_min = 5.5  ; % [bar]
-p_inlet_max = 29   ; % [bar]
-Dp_feed     = 0.35 ; % [bar]
+p_inlet_min = 5.5e5  ; % [Pa]
+p_inlet_max = 29e5   ; % [Pa]
+Dp_feed     = 0.35e5 ; % [Pa]
 
 % Pressure cascade
-p_gas_i = p_inlet_max + Dp_feed ; % [bar]
-p_gas_f = p_inlet_min + Dp_feed ; % [bar]
+p_gas_i = p_inlet_max + Dp_feed ; % [Pa]
+p_gas_f = p_inlet_min + Dp_feed ; % [Pa]
 
 % Blow-down ratio
 B = p_gas_i / p_gas_f ; % [-]
 
 % Initial volume of pressurizing gas
-V_gas_i = V_prop / (B - 1) ; 
+V_gas_i = V_prop / (B - 1) ;  %[m^3]
 
 % Tank Temperature
-T_tank = 293;
+T_tank = 293; %[K]
 
 % Mass Helium
 R_gas_He      = 2077.3 ;
-M_gas_He      = (p_gas_i*1e5 * V_gas_i*1e-3)/(R_gas_He * T_tank); % [kg]
+M_gas_He      = (p_gas_i* V_gas_i)/(R_gas_He * T_tank); % [kg]
 M_gas_real_He = 1.2*M_gas_He ;
 
 % Mass Nitrogen
 R_gas_N2      = 296.8 ;
-M_gas_N2      = (p_gas_i*1e5 * V_gas_i*1e-3)/(R_gas_N2 * T_tank); % [kg]
-M_gas_real_He = 1.2*M_gas_N2 
+M_gas_N2      = (p_gas_i*V_gas_i)/(R_gas_N2 * T_tank); % [kg]
+M_gas_real_He = 1.2*M_gas_N2; 
+
+%% TANKS
+V_tanks = 1.01*(V_gas_i + V_prop); %[m^3]
+V_tank  = V_tanks/2 ; %[m^3]
+r_tank  = ( 9*V_tank/(16*pi) )^(1/3); % [m]
+h_cyl   = 4/9 * r_tank; 
+
+sigma = 950e6 ; %[Pa]
+rho_tank = 4430 ; % [kg/m^3]
+
+t_tank_sph = p_gas_i*r_tank/(2*sigma) ; %[m]
+t_tank_cyl = p_gas_i*r_tank/(sigma) ; %[m]
+
+M_tank_sph = rho_tank*4/3*pi*((r_tank+t_tank_sph)^3-r_tank^3); % [kg]
+M_tank_cyl = rho_tank*pi*((r_tank+t_tank_cyl)^2-r_tank^2)*h_cyl; % [kg] 
+
+M_tank = M_tank_sph + M_tank_cyl;
+
+%% MASS BUDGET
+M_th = 0.49;
+
+M_tot        = 10*M_th + 2*M_tank + M_gas_real_He ;
+M_tot_margin = 1.1*M_tot
